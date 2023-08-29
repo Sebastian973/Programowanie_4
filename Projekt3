@@ -1,0 +1,88 @@
+Aplikacja będzie zawierać listę klientów, formularz do dodawania nowych klientów, edycję oprogramowania klientów oraz przycisk, który będzie służył do usuwania klientów.
+
+Poniżej model danych dla tabeli Klienci:
+
+public class Customer
+{
+    public int Id { get; set; }
+    public string Nazwa { get; set; }
+    public string Adres_Email { get; set; }
+}
+----------------------------------------
+
+W pliku MainWindow.xaml zdefiniujemy interfejs użytkownika:
+
+<Window x:Class="CRUDApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CRUD App" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Button Content="Add Customer" Click="AddCustomer_Click"/>
+        <ListView Grid.Row="1" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Nazwa" DisplayMemberBinding="{Binding Nazwa}"/>
+                    <GridViewColumn Header="Adres_Email" DisplayMemberBinding="{Binding Adres_Email}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Button Grid.Row="1" Content="Edit Customer" Click="EditCustomer_Click"/>
+        <Button Grid.Row="1" Content="Delete Customer" Click="DeleteCustomer_Click"/>
+    </Grid>
+</Window>
+--------------------------------------------------------------------------------------------------------
+
+
+ W pliku MainWindow.xaml.cs implementujemy logikę obsługi i pobieranie/aktualizowanie danych.
+
+public partial class MainWindow : Window
+{
+    private ObservableCollection<Customer> customers;
+    private Customer selectedCustomer;
+
+    public ObservableCollection<Customer> Customers
+    {
+        get { return customers; }
+        set { customers = value; }
+    }
+
+    public Customer SelectedCustomer
+    {
+        get { return selectedCustomer; }
+        set { selectedCustomer = value; }
+    }
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        DataContext = this;
+        LoadCustomers();
+    }
+
+    private void LoadCustomers()
+    {
+        // Pobranie klientów z bazy danych
+        using (var context = new YourDbContext())
+        {
+            Customers = new ObservableCollection<Customer>(context.Customers.ToList());
+        }
+    }
+
+    private void AddCustomer_Click(object sender, RoutedEventArgs e)
+    {
+        // Otwarcie okna do dodawania nowego klienta
+        var addCustomerWindow = new AddCustomerWindow();
+        addCustomerWindow.ShowDialog();
+
+        // Odświeżenie listy klientów po dodaniu
+        LoadCustomers();
+    }
+
+    private void EditCustomer_Click(object sender, RoutedEventArgs e)
+    {
+        // Sprawdzenie,
